@@ -1,35 +1,16 @@
 package tw.org.iii.ideas.common;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
 import org.apache.http.protocol.HTTP;
-
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.widget.ImageView;
 
 public abstract class Utility
 {

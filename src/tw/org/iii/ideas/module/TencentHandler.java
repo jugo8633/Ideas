@@ -1,11 +1,5 @@
 package tw.org.iii.ideas.module;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import tw.org.iii.ideas.R;
@@ -13,24 +7,38 @@ import tw.org.iii.ideas.common.Logs;
 
 import com.tencent.connect.UserInfo;
 import com.tencent.connect.auth.QQAuth;
+import com.tencent.connect.auth.QQToken;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.util.SparseArray;
 
 public class TencentHandler
 {
-	public static QQAuth	mQQAuth;
-	private UserInfo		mInfo;
-	private Tencent			mTencent;
-	private Activity		theActivity	= null;
+	private QQAuth									mQQAuth;
+	private UserInfo								mInfo;
+	private Tencent									mTencent;
+	private Activity								theActivity				= null;
+	private SparseArray<OnTencentLoginResult>		listLoginListener		= null;
+	private SparseArray<OnTencentUserInfoListener>	listUserInfoListener	= null;
 
 	public TencentHandler(Activity activity)
 	{
 		theActivity = activity;
+		listLoginListener = new SparseArray<OnTencentLoginResult>();
+		listUserInfoListener = new SparseArray<OnTencentUserInfoListener>();
+	}
+
+	@Override
+	protected void finalize() throws Throwable
+	{
+		listLoginListener.clear();
+		listLoginListener = null;
+		listUserInfoListener.clear();
+		listUserInfoListener = null;
+		super.finalize();
 	}
 
 	public void init()
@@ -40,6 +48,57 @@ public class TencentHandler
 		mTencent = Tencent.createInstance(theActivity.getString(R.string.tencent_app_id), theActivity);
 	}
 
+	/**
+	 * Callback Tencent login complete
+	 */
+	public static interface OnTencentLoginResult
+	{
+		void onLoginResult(final String strOpenID, final String strToken, final String strError);
+	}
+
+	public void setOnTencentLoginResultListener(TencentHandler.OnTencentLoginResult listener)
+	{
+		if (null != listener)
+		{
+			listLoginListener.put(listLoginListener.size(), listener);
+		}
+	}
+
+	private void callbackTencentLoginResult(final String strOpenID, final String strToken, final String strError)
+	{
+		for (int i = 0; i < listLoginListener.size(); ++i)
+		{
+			listLoginListener.get(i).onLoginResult(strOpenID, strToken, strError);
+		}
+	}
+
+	/**
+	 * Callback Tencent User Info
+	 */
+	public static interface OnTencentUserInfoListener
+	{
+		void onUserInfo(final String strNickname, final String strPhotoURL, final String strError);
+	}
+
+	public void setOnTencentUserInfoListener(TencentHandler.OnTencentUserInfoListener listener)
+	{
+		if (null != listener)
+		{
+			listUserInfoListener.put(listUserInfoListener.size(), listener);
+		}
+	}
+
+	private void callbackTencentUserInfo(final String strNickname, final String strPhotoURL, final String strError)
+	{
+		for (int i = 0; i < listUserInfoListener.size(); ++i)
+		{
+			listUserInfoListener.get(i).onUserInfo(strNickname, strPhotoURL, strError);
+		}
+	}
+
+	/**
+	 * Show tencent qq login activity
+	 */
 	public void login()
 	{
 		if (!mQQAuth.isSessionValid())
@@ -50,19 +109,18 @@ public class TencentHandler
 				protected void doComplete(JSONObject values)
 				{
 					Logs.showTrace("QQ Login Complete: " + values.toString());
-					updateUserInfo();
+
 					if (null != values)
 					{
-						try
+						Logs.showTrace("QQ Open Id: " + mQQAuth.getQQToken().getOpenId());
+						Logs.showTrace("QQ Access Token:" + mQQAuth.getQQToken().getAccessToken());
+
+						if (mQQAuth.isSessionValid())
 						{
-							String qq_openid = values.getString("openid");
-							Logs.showTrace("QQ Open Id: " + qq_openid);
-							return;
+							updateUserInfo(mQQAuth.getQQToken());
 						}
-						catch (JSONException e)
-						{
-							e.printStackTrace();
-						}
+						callbackTencentLoginResult(mQQAuth.getQQToken().getOpenId(), mQQAuth.getQQToken()
+								.getAccessToken(), null);
 					}
 				}
 			};
@@ -80,7 +138,10 @@ public class TencentHandler
 	public void logout()
 	{
 		mQQAuth.logout(theActivity);
-		updateUserInfo();
+		if (null != mQQAuth && mQQAuth.isSessionValid())
+		{
+			updateUserInfo(mQQAuth.getQQToken());
+		}
 		Logs.showTrace("QQ Logout");
 	}
 
@@ -101,98 +162,65 @@ public class TencentHandler
 		@Override
 		public void onError(UiError e)
 		{
-			Logs.showTrace("QQ Error: " + e.errorDetail);
+			Logs.showError("QQ Error: " + e.errorDetail);
+			callbackTencentLoginResult(null, null, e.errorDetail);
 		}
 
 		@Override
 		public void onCancel()
 		{
 			Logs.showTrace("QQ Cancel");
+			callbackTencentLoginResult(null, null, "QQ Cancel");
 		}
 	}
 
-	private void updateUserInfo()
+	private void updateUserInfo(QQToken strAccessToken)
 	{
-		if (mQQAuth != null && mQQAuth.isSessionValid())
+
+		if (null != strAccessToken)
 		{
 			IUiListener listener = new IUiListener()
 			{
 				@Override
-				public void onError(UiError e)
-				{
-
-				}
-
-				@Override
 				public void onComplete(final Object response)
 				{
 					Logs.showTrace("updateUserInfo QQ Response: " + response.toString());
-					new Thread()
+					try
 					{
-						@Override
-						public void run()
+						JSONObject json = (JSONObject) response;
+						if (json.has("nickname"))
 						{
-							JSONObject json = (JSONObject) response;
-							if (json.has("nickname"))
-							{
-								try
-								{
-									String qq_nickname = json.getString("nickname");
-								}
-								catch (JSONException e)
-								{
-									e.printStackTrace();
-								}
-							}
-
-							if (json.has("figureurl"))
-							{
-								try
-								{
-									Bitmap qq_picture = getbitmap(json.getString("figureurl_qq_2"));
-								}
-								catch (JSONException e)
-								{
-									e.printStackTrace();
-								}
-							}
+							Logs.showTrace("QQ Nickname:" + json.getString("nickname"));
 						}
-
-					}.start();
+						if (json.has("figureurl"))
+						{
+							Logs.showTrace("QQ Photo:" + json.getString("figureurl_qq_2"));
+						}
+						callbackTencentUserInfo(json.getString("nickname"), json.getString("figureurl_qq_2"), null);
+					}
+					catch (Exception e)
+					{
+						Logs.showError("Tencent Exception:" + e.toString());
+						callbackTencentUserInfo(null, null, e.toString());
+					}
 				}
 
 				@Override
 				public void onCancel()
 				{
+					Logs.showError("Tencent Get User Info Cancel");
+					callbackTencentUserInfo(null, null, "Tencent Get User Info Cancel");
+				}
+
+				@Override
+				public void onError(UiError e)
+				{
+					Logs.showError("Tencent Exception:" + e.errorDetail);
+					callbackTencentUserInfo(null, null, e.errorDetail);
 				}
 			};
-			mInfo = new UserInfo(theActivity, mQQAuth.getQQToken());
+			mInfo = new UserInfo(theActivity, strAccessToken);
 			mInfo.getUserInfo(listener);
 		}
-		else
-		{
-
-		}
-	}
-
-	private Bitmap getbitmap(String imageUri)
-	{
-		Bitmap bitmap = null;
-		try
-		{
-			URL myFileUrl = new URL(imageUri);
-			HttpURLConnection conn = (HttpURLConnection) myFileUrl.openConnection();
-			conn.setDoInput(true);
-			conn.connect();
-			InputStream is = conn.getInputStream();
-			bitmap = BitmapFactory.decodeStream(is);
-			is.close();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-		return bitmap;
 	}
 }

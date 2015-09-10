@@ -81,7 +81,7 @@ public class FacebookHandler
 	/**
 	 * Show Facebook Login Activity.
 	 */
-	public void show()
+	public void login()
 	{
 		if (null == theActivity || null == callbackManager || null == loginManager)
 			return;
