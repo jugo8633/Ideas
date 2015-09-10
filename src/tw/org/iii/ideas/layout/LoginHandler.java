@@ -1,11 +1,9 @@
 package tw.org.iii.ideas.layout;
 
-import tw.org.iii.ideas.FacebookActivity;
 import tw.org.iii.ideas.R;
 import tw.org.iii.ideas.common.Logs;
 import tw.org.iii.ideas.module.FacebookHandler;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,10 +33,6 @@ public class LoginHandler extends BaseHandler
 		{
 			btnFacebook.setOnClickListener(itemClickListener);
 		}
-		else
-		{
-			Logs.showError("###########################");
-		}
 	}
 
 	private void showFacebookLogin()
@@ -48,11 +42,15 @@ public class LoginHandler extends BaseHandler
 		Logs.showTrace("Facebook Login Start");
 		facebook = new FacebookHandler(theActivity);
 		facebook.init();
+		facebook.setOnFacebookLoginResultListener(new FacebookHandler.OnFacebookLoginResult()
+		{
+			@Override
+			public void onLoginResult(String strFBID, String strName, String strError)
+			{
+				Logs.showTrace("Login Facebook: " + strFBID + " " + strName + " " + strError);
+			}
+		});
 		facebook.show();
-
-		// Intent intent = new Intent();
-		// intent.setClass(theActivity, FacebookActivity.class);
-		// theActivity.startActivity(intent);
 	}
 
 	private OnClickListener	itemClickListener	= new OnClickListener()

@@ -3,5 +3,7 @@
 
     <string name="app_name">Ideas</string>
     <string name="facebook_app_id">1494189730894380</string>
+    <string name="tencent_app_id" formatted="false">222222</string>
+    <string name="tencent_login_btn">Login with QQ</string>
 
 </resources>
