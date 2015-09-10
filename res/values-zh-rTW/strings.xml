@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Ideas</string>
+    <string name="facebook_app_id">1494189730894380</string>
+    <string name="tencent_app_id" formatted="false">222222</string>
+    <string name="tencent_login_btn">使用騰訊QQ登入</string>
+
+</resources>
