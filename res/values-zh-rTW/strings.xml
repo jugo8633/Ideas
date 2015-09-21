@@ -5,5 +5,6 @@
     <string name="facebook_app_id">1494189730894380</string>
     <string name="tencent_app_id" formatted="false">222222</string>
     <string name="tencent_login_btn">使用騰訊QQ登入</string>
+    <string name="barcode_scan">Barcode 掃描</string>
 
 </resources>

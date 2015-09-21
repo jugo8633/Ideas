@@ -71,6 +71,9 @@
                 <data android:scheme="tencent222222" />
             </intent-filter>
         </activity>
+        <!-- QR Code Scanner Activity -->
+        <activity android:name="tw.org.iii.ideas.module.BarcodeScanHandler" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,15 +1,17 @@
 package tw.org.iii.ideas;
 
+import tw.org.iii.ideas.common.Messages;
 import tw.org.iii.ideas.layout.LoginHandler;
 import tw.org.iii.ideas.layout.MainHandler;
+import tw.org.iii.ideas.module.BarcodeScanHandler;
 import tw.org.iii.ideas.module.FacebookHandler;
 
 import com.facebook.appevents.AppEventsLogger;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 
 public class MainActivity extends Activity
 {
@@ -20,7 +22,8 @@ public class MainActivity extends Activity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		showLoginView();
+		// showLoginView();
+		showMainView();
 	}
 
 	@Override
@@ -58,7 +61,24 @@ public class MainActivity extends Activity
 		loginHandler.show();
 	}
 
-	private Handler	theHandler	= new Handler()
-								{
-								};
+	private void showQrScanner()
+	{
+		Intent openCameraIntent = new Intent(MainActivity.this, BarcodeScanHandler.class);
+		// openCameraIntent.putExtra("missionindex", nMissionDataIndex);
+		startActivityForResult(openCameraIntent, BarcodeScanHandler.ACTIVITY_REQUEST_CODE);
+	}
+
+	private Handler theHandler = new Handler()
+	{
+		@Override
+		public void handleMessage(Message msg)
+		{
+			switch (msg.what)
+			{
+				case Messages.MSG_SHOW_QR_SCANNER:
+					showQrScanner();
+					break;
+			}
+		}
+	};
 }
