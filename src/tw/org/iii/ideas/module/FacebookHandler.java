@@ -99,49 +99,53 @@ public class FacebookHandler
 				@Override
 				public void onCompleted(JSONObject object, GraphResponse response)
 				{
+					Logs.showTrace("Facebook Token:" + strToken.getToken());
 					Logs.showTrace("Facebook ID:" + object.optString("id"));
 					Logs.showTrace("Facebook Name:" + object.optString("name"));
 					Logs.showTrace("Facebook Link:" + object.optString("link"));
+					Logs.showTrace("Facebook Email:" + object.optString("email"));
+					Logs.showTrace("Facebook Birthday:" + object.optString("birthday"));
+					Logs.showTrace("Facebook Gender:" + object.optString("gender"));
+					Logs.showTrace("Facebook Locale:" + object.optString("locale"));
+					Logs.showTrace("Facebook Timezone:" + object.optString("timezone"));
+					Logs.showTrace("Facebook Update Time:" + object.optString("updated_time"));
 					callbackFacebookResult(object.optString("id"), object.optString("name"), null);
 				}
 
 			});
 
 			Bundle parameters = new Bundle();
-			parameters.putString("fields", "id,name,link");
+			parameters.putString("fields", "id,name,link,email,birthday,gender,locale,timezone,updated_time");
 			request.setParameters(parameters);
 			request.executeAsync();
 		}
 	}
 
-	private FacebookCallback<LoginResult>	facebookCallback	= new FacebookCallback<LoginResult>()
-																{
+	private FacebookCallback<LoginResult> facebookCallback = new FacebookCallback<LoginResult>()
+	{
 
-																	@Override
-																	public void onSuccess(LoginResult loginResult)
-																	{
-																		Logs.showTrace("Facebook Login Success");
-																		accessToken = loginResult.getAccessToken();
-																		callGraph(accessToken);
-																	}
+		@Override
+		public void onSuccess(LoginResult loginResult)
+		{
+			Logs.showTrace("Facebook Login Success");
+			accessToken = loginResult.getAccessToken();
+			callGraph(accessToken);
+		}
 
-																	@Override
-																	public void onCancel()
-																	{
-																		Logs.showTrace("Facebook Login Cancel");
-																		callbackFacebookResult(null, null,
-																				"Facebook Login Cancel");
-																	}
+		@Override
+		public void onCancel()
+		{
+			Logs.showTrace("Facebook Login Cancel");
+			callbackFacebookResult(null, null, "Facebook Login Cancel");
+		}
 
-																	@Override
-																	public void onError(FacebookException error)
-																	{
-																		Logs.showTrace("Facebook Exception:"
-																				+ error.toString());
-																		callbackFacebookResult(null, null,
-																				error.toString());
-																	}
+		@Override
+		public void onError(FacebookException error)
+		{
+			Logs.showTrace("Facebook Exception:" + error.toString());
+			callbackFacebookResult(null, null, error.toString());
+		}
 
-																};
+	};
 
 }

@@ -1,29 +1,78 @@
 package tw.org.iii.ideas;
 
+import tw.org.iii.ideas.common.Logs;
 import tw.org.iii.ideas.common.Messages;
 import tw.org.iii.ideas.layout.LoginHandler;
 import tw.org.iii.ideas.layout.MainHandler;
-import tw.org.iii.ideas.module.BarcodeScanHandler;
+import tw.org.iii.ideas.module.InvoiceScanHandler;
+import tw.org.iii.ideas.module.DeviceHandler;
 import tw.org.iii.ideas.module.FacebookHandler;
 
 import com.facebook.appevents.AppEventsLogger;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.SparseArray;
 
 public class MainActivity extends Activity
 {
 	private MainHandler		mainHandler		= null;
 	private LoginHandler	loginHandler	= null;
+	private DeviceHandler	deviceHandler	= null;
+	private Tracker			tracker			= null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		// showLoginView();
-		showMainView();
+		showLoginView();
+		// showMainView();
+		deviceHandler = new DeviceHandler(this);
+
+		Logs.showTrace("Device IMEI:" + deviceHandler.getIMEI());
+		Logs.showTrace("Device MAC Address:" + deviceHandler.getMacAddress());
+
+		SparseArray<DeviceHandler.AccountData> listAccount = new SparseArray<DeviceHandler.AccountData>();
+		deviceHandler.getAccounts(listAccount);
+		for (int i = 0; i < listAccount.size(); ++i)
+		{
+			Logs.showTrace(listAccount.get(i).strType + " Account is: " + listAccount.get(i).strAccount);
+		}
+
+		DeviceHandler.TeleData teleData = new DeviceHandler.TeleData();
+		deviceHandler.getTelecomInfo(teleData);
+		Logs.showTrace("手機號碼:" + teleData.lineNumber);
+		Logs.showTrace("手機 IMEI:" + teleData.imei);
+		Logs.showTrace("手機 IMSI:" + teleData.imsi);
+		Logs.showTrace("手機漫遊狀態:" + teleData.roamingStatus);
+		Logs.showTrace("電信網路國別:" + teleData.country);
+		Logs.showTrace("電信公司代號:" + teleData.operator);
+		Logs.showTrace("電信公司名稱:" + teleData.operatorName);
+		Logs.showTrace("行動網路類型:" + teleData.networkType);
+		Logs.showTrace("行動通訊類型:" + teleData.phoneType);
+
+		deviceHandler.getLocation();
+
+		tracker = ((IdeasApplication) getApplication()).getTracker(IdeasApplication.TrackerName.APP_TRACKER);
+	}
+
+	@Override
+	protected void onStart()
+	{
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+		super.onStart();
+	}
+
+	@Override
+	protected void onStop()
+	{
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
 	}
 
 	@Override
@@ -63,9 +112,9 @@ public class MainActivity extends Activity
 
 	private void showQrScanner()
 	{
-		Intent openCameraIntent = new Intent(MainActivity.this, BarcodeScanHandler.class);
+		Intent openCameraIntent = new Intent(MainActivity.this, InvoiceScanHandler.class);
 		// openCameraIntent.putExtra("missionindex", nMissionDataIndex);
-		startActivityForResult(openCameraIntent, BarcodeScanHandler.ACTIVITY_REQUEST_CODE);
+		startActivityForResult(openCameraIntent, InvoiceScanHandler.ACTIVITY_REQUEST_CODE);
 	}
 
 	private Handler theHandler = new Handler()
