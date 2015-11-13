@@ -2,6 +2,7 @@ package tw.org.iii.ideas;
 
 import tw.org.iii.ideas.common.Logs;
 import tw.org.iii.ideas.common.Messages;
+import tw.org.iii.ideas.common.Device;
 import tw.org.iii.ideas.layout.LoginHandler;
 import tw.org.iii.ideas.layout.MainHandler;
 import tw.org.iii.ideas.module.InvoiceScanHandler;
@@ -58,6 +59,10 @@ public class MainActivity extends Activity
 
 		deviceHandler.getLocation();
 
+		String strAAID = Device.getAAID(this);
+		Logs.showTrace("AAID:" + strAAID);
+		Device.getGaid(this);
+		
 		tracker = ((IdeasApplication) getApplication()).getTracker(IdeasApplication.TrackerName.APP_TRACKER);
 	}
 
