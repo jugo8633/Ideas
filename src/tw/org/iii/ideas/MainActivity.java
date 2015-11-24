@@ -47,15 +47,15 @@ public class MainActivity extends Activity
 
 		DeviceHandler.TeleData teleData = new DeviceHandler.TeleData();
 		deviceHandler.getTelecomInfo(teleData);
-		Logs.showTrace("¤â¾÷¸¹½X:" + teleData.lineNumber);
-		Logs.showTrace("¤â¾÷ IMEI:" + teleData.imei);
-		Logs.showTrace("¤â¾÷ IMSI:" + teleData.imsi);
-		Logs.showTrace("¤â¾÷º©¹Cª¬ºA:" + teleData.roamingStatus);
-		Logs.showTrace("¹q«Hºô¸ô°ê§O:" + teleData.country);
-		Logs.showTrace("¹q«H¤½¥q¥N¸¹:" + teleData.operator);
-		Logs.showTrace("¹q«H¤½¥q¦WºÙ:" + teleData.operatorName);
-		Logs.showTrace("¦æ°Êºô¸ôÃþ«¬:" + teleData.networkType);
-		Logs.showTrace("¦æ°Ê³q°TÃþ«¬:" + teleData.phoneType);
+		Logs.showTrace("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½X:" + teleData.lineNumber);
+		Logs.showTrace("ï¿½ï¿½ï¿½ IMEI:" + teleData.imei);
+		Logs.showTrace("ï¿½ï¿½ï¿½ IMSI:" + teleData.imsi);
+		Logs.showTrace("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½A:" + teleData.roamingStatus);
+		Logs.showTrace("ï¿½qï¿½Hï¿½ï¿½ï¿½ï¿½ï¿½ï¿½O:" + teleData.country);
+		Logs.showTrace("ï¿½qï¿½Hï¿½ï¿½ï¿½qï¿½Nï¿½ï¿½:" + teleData.operator);
+		Logs.showTrace("ï¿½qï¿½Hï¿½ï¿½ï¿½qï¿½Wï¿½ï¿½:" + teleData.operatorName);
+		Logs.showTrace("ï¿½ï¿½Êºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:" + teleData.networkType);
+		Logs.showTrace("ï¿½ï¿½Ê³qï¿½Tï¿½ï¿½ï¿½ï¿½:" + teleData.phoneType);
 
 		deviceHandler.getLocation();
 
@@ -98,7 +98,17 @@ public class MainActivity extends Activity
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
 		super.onActivityResult(requestCode, resultCode, data);
-		FacebookHandler.callbackManager.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK && InvoiceScanHandler.ACTIVITY_REQUEST_CODE == requestCode)
+		{
+			Bundle bundle = data.getExtras();
+			String scanResult = bundle.getString("result");
+			String strReward = bundle.getString("reward");
+			Logs.showTrace("QR Code:" + scanResult);
+		}
+		else
+		{
+			FacebookHandler.callbackManager.onActivityResult(requestCode, resultCode, data);
+		}
 	}
 
 	private void showMainView()
@@ -129,9 +139,9 @@ public class MainActivity extends Activity
 		{
 			switch (msg.what)
 			{
-				case Messages.MSG_SHOW_QR_SCANNER:
-					showQrScanner();
-					break;
+			case Messages.MSG_SHOW_QR_SCANNER:
+				showQrScanner();
+				break;
 			}
 		}
 	};
