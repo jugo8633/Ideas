@@ -2,8 +2,14 @@
  * @author Louis Ju
  * @date 2015/9/10
  * @note
- *         �NFacebookHandler.callbackManager.onActivityResult(requestCode,
- *         resultCode, data); �[�� Activity��onActivityResult
+ *         �NFacebookHandler.callbackManager.onActivityResult(requestCode,
+ *         resultCode, data); �[�� Activity��onActivityResult
+ *         
+ *         1. 要使用facebook sdk 要先產生api key, 產生方式如下指令：
+
+keytool -exportcert -alias androiddebugkey -keystore ".android\debug.keystore" | openssl sha1 -binary | openssl base64
+
+注意：debug.keystore 是android sdk的
  */
 
 package tw.org.iii.ideas.module;
@@ -32,6 +38,7 @@ public class FacebookHandler
 	private AccessToken							accessToken;
 	private LoginManager						loginManager;
 	private SparseArray<OnFacebookLoginResult>	listOnFacebookLoginResult	= null;
+	private OnFacebookLoginResult				onFacebookLoginResult		= null;
 
 	public FacebookHandler(Activity activity)
 	{
@@ -64,6 +71,8 @@ public class FacebookHandler
 
 	public void setOnFacebookLoginResultListener(FacebookHandler.OnFacebookLoginResult listener)
 	{
+		onFacebookLoginResult = listener;
+
 		if (null != listener)
 		{
 			listOnFacebookLoginResult.put(listOnFacebookLoginResult.size(), listener);
@@ -72,9 +81,16 @@ public class FacebookHandler
 
 	private void callbackFacebookResult(final String strFBID, final String strName, final String strError)
 	{
+		if (null != onFacebookLoginResult)
+		{
+			onFacebookLoginResult.onLoginResult(strFBID, strName, strError);
+		}
 		for (int i = 0; i < listOnFacebookLoginResult.size(); ++i)
 		{
-			listOnFacebookLoginResult.get(i).onLoginResult(strFBID, strName, strError);
+			if (null != listOnFacebookLoginResult.get(i))
+			{
+				listOnFacebookLoginResult.get(i).onLoginResult(strFBID, strName, strError);
+			}
 		}
 	}
 
