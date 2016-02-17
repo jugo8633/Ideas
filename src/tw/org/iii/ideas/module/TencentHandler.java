@@ -1,10 +1,7 @@
 package tw.org.iii.ideas.module;
 
 import org.json.JSONObject;
-
-import tw.org.iii.ideas.R;
 import tw.org.iii.ideas.common.Logs;
-
 import com.tencent.connect.UserInfo;
 import com.tencent.connect.auth.QQAuth;
 import com.tencent.connect.auth.QQToken;
@@ -41,11 +38,10 @@ public class TencentHandler
 		super.finalize();
 	}
 
-	public void init()
+	public void init(final String strAppId)
 	{
-		mQQAuth = QQAuth.createInstance(theActivity.getString(R.string.tencent_app_id),
-				theActivity.getApplicationContext());
-		mTencent = Tencent.createInstance(theActivity.getString(R.string.tencent_app_id), theActivity);
+		mQQAuth = QQAuth.createInstance(strAppId, theActivity.getApplicationContext());
+		mTencent = Tencent.createInstance(strAppId, theActivity);
 	}
 
 	/**
@@ -119,8 +115,8 @@ public class TencentHandler
 						{
 							updateUserInfo(mQQAuth.getQQToken());
 						}
-						callbackTencentLoginResult(mQQAuth.getQQToken().getOpenId(), mQQAuth.getQQToken()
-								.getAccessToken(), null);
+						callbackTencentLoginResult(mQQAuth.getQQToken().getOpenId(),
+								mQQAuth.getQQToken().getAccessToken(), null);
 					}
 				}
 			};

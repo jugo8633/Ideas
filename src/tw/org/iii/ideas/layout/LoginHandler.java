@@ -68,7 +68,7 @@ public class LoginHandler extends BaseHandler
 			return;
 		Logs.showTrace("Tencent Login Start");
 		tencent = new TencentHandler(theActivity);
-		tencent.init();
+		tencent.init(theActivity.getString(R.string.tencent_app_id));
 		tencent.setOnTencentLoginResultListener(new TencentHandler.OnTencentLoginResult()
 		{
 			@Override
@@ -88,20 +88,20 @@ public class LoginHandler extends BaseHandler
 		tencent.login();
 	}
 
-	private OnClickListener	itemClickListener	= new OnClickListener()
-												{
-													@Override
-													public void onClick(View v)
-													{
-														switch (v.getId())
-														{
-															case R.id.textViewLoginFacebook:
-																showFacebookLogin();
-																break;
-															case R.id.textViewLoginTencent:
-																showTencentLogin();
-																break;
-														}
-													}
-												};
+	private OnClickListener itemClickListener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			switch(v.getId())
+			{
+			case R.id.textViewLoginFacebook:
+				showFacebookLogin();
+				break;
+			case R.id.textViewLoginTencent:
+				showTencentLogin();
+				break;
+			}
+		}
+	};
 }
